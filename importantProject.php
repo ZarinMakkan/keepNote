@@ -22,6 +22,13 @@ if(!empty($_POST["delete"])) {
 }
 $query = new MongoDB\Driver\Query(['user' => $_SESSION["userName"]]);
 $rows = $manager->executeQuery('keepNote.task', $query);
+
+// if(!empty($_POST['collabName'])) {
+//     echo $_SESSION["nameText"];
+// }
+// else
+//     echo "ni";
+var_dump($_POST);
 ?>
 <!DOCTYPE html>
 <html>
@@ -51,16 +58,23 @@ $rows = $manager->executeQuery('keepNote.task', $query);
                         echo 'checked';
                     }
                     ?>/>
+
                     <input type="text" value="<?php echo $row->text;?>"/>
                     <input class="btnCheckbox" type="submit" value="to Do it"/>
                     <input class="btnCheckbox" name="delete" type="submit" value="Delete"/>
+
+                    <input class="btnCheckbox" name="collaborate" type="submit" value="collaborate" onclick="window.open('smallPageCollab.php', 
+                            'mylala', 
+                            'width=300,height=250,left=520, top=250'); 
+                    return false;"<?php $_SESSION["nameText"] = $row->text; ?>/>
                 </li>
             </form>
         <?php } ?>
         </ul>
-
+        
         <script>
             
         </script>
+        
     </body>
 </html>

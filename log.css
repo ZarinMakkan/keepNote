@@ -14,8 +14,9 @@
   padding: 16px;
 }
 
-body {
+* {
   font-family: 'Tanha';
+  text-align: center;
 }
 /* Full-width input fields */
 input[type=text], input[type=password] {
