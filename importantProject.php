@@ -23,12 +23,26 @@ if(!empty($_POST["delete"])) {
 $query = new MongoDB\Driver\Query(['user' => $_SESSION["userName"]]);
 $rows = $manager->executeQuery('keepNote.task', $query);
 
-// if(!empty($_POST['collabName'])) {
-//     echo $_SESSION["nameText"];
-// }
-// else
-//     echo "ni";
-var_dump($_POST);
+if(!empty($_POST['theField'])) {
+    $collabFindUserQ = new MongoDB\Driver\Query(['userName' => $_POST['theField']]);
+    $existUser = $manager->executeQuery('keepNote.users', $collabFindUserQ)->toArray();
+    if(empty($existUser)) {
+        echo '<script type="text/JavaScript"> 
+            alert("User Not Found!");
+            </script>'
+        ;
+    }
+    else{
+        $bulk = new MongoDB\Driver\BulkWrite;
+        $bulk->insert(['text' => $_POST["nameText"], 'done' => false, 'user' => $existUser[0]->userName]);
+        $manager->executeBulkWrite('keepNote.task', $bulk);
+        echo '<script type="text/JavaScript"> 
+            alert("Secsessful Collaborate!");
+            </script>'
+        ;
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -50,7 +64,7 @@ var_dump($_POST);
         <?php
         foreach($rows as $row) {
         ?>  
-            <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="POST">
+            <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" id="theForm" method="POST">
                 <li>
                     <input type="hidden" name="nameText" value="<?php echo $row->text;?>" />
                     <input class="checkbox" type="checkbox" value="<?php echo $row->text;?>" name="done" <?php
@@ -63,18 +77,20 @@ var_dump($_POST);
                     <input class="btnCheckbox" type="submit" value="to Do it"/>
                     <input class="btnCheckbox" name="delete" type="submit" value="Delete"/>
 
+                    <input type="hidden" name="theField" id="theField"/>
                     <input class="btnCheckbox" name="collaborate" type="submit" value="collaborate" onclick="window.open('smallPageCollab.php', 
                             'mylala', 
                             'width=300,height=250,left=520, top=250'); 
-                    return false;"<?php $_SESSION["nameText"] = $row->text; ?>/>
+                    return false;" />
                 </li>
             </form>
         <?php } ?>
         </ul>
         
-        <script>
-            
-        </script>
-        
     </body>
 </html>
+<script>
+    function printResault(Sr) {
+        alert (Sr);
+    }
+</script>

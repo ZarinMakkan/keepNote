@@ -15,7 +15,9 @@
 }
 
 * {
-  font-family: 'Tanha';
+  font-family: Tanha;
+}
+#smallLabel {
   text-align: center;
 }
 /* Full-width input fields */

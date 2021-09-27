@@ -4,7 +4,7 @@ $bulk = new MongoDB\Driver\BulkWrite;
 // $bulk->insert(['name' => 122, 'family' => 3546457568]);
 // $manager->executeBulkWrite('todoo.pass', $bulk);
 $query = new MongoDB\Driver\Query([]);
-$rows = $manager->executeQuery('keepNote.task', $query);
+$rows = $manager->executeQuery('keepNote.users', $query);
 echo "<pre>";
 
 foreach ($rows as $row) {

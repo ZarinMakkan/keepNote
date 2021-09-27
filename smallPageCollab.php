@@ -5,17 +5,21 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" type="text/css" href="./log.css?v=<?php echo time(); ?>" />
     </head>
-    <body>
-        <form  action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="POST">
-            <label>اسم دوستت که میخای این کارو باهاش به اشتراک بزاری رو بزن</label>
-            <input name="collabName" type="text"/>
-            <input class="btnCheckbox" type="submit" value="To Collab" onclick="window.close()"/>
-        </form>
+    <body  id="smallLabel">
+        <label>اسم دوستت که میخای این کارو باهاش به اشتراک بزاری رو بزن</label>
+        <input id="thePopupField" type="text"/>
+        <input class="btnCheckbox" type="submit" value="To Collab" onclick="doTheSubmit()"/>
     </body>
 </html>
 <script>
-    window.onunload = refreshParent;
-    function refreshParent() {
-        window.opener.location.reload();
+    function doTheSubmit() {
+        
+        var doc = window.opener.document,
+            theForm = doc.getElementById("theForm"),
+            theField = doc.getElementById("theField");
+        theField.value = document.getElementById("thePopupField").value;
+        
+        window.close();
+        theForm.submit();
     }
 </script>
