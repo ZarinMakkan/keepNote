@@ -1,72 +1,104 @@
 <?php
+session_start();
+if(empty($_SESSION['userName'])) {
+    header("Location:/keepNote/loginPage.php");
+    exit;
+}
+
 $manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
-if (!empty($_POST["taskName"])){
-	$bulk = new MongoDB\Driver\BulkWrite;
-	$bulk->insert(['task' => $_POST["taskName"], 'completed' => 0]);
-	$manager->executeBulkWrite('todo.tasks', $bulk);
+if(!empty($_POST["workToDo"])) {
+    $bulk = new MongoDB\Driver\BulkWrite;
+    $bulk->insert(['text' => $_POST["workToDo"], 'done' => false, 'user' => $_SESSION["userName"]]);
+    $manager->executeBulkWrite('keepNote.task', $bulk);
 }
-if (isset($_POST["delete"])){
-  $bulk = new MongoDB\Driver\BulkWrite;
-  $bulk->delete(['task' => $_POST["oldTaskName"]]);
-  $manager->executeBulkWrite('todo.tasks', $bulk);
-}else if (isset($_POST["update"])){
-  $bulk = new MongoDB\Driver\BulkWrite;
-  $bulk->update(
-      ['task' => $_POST["oldTaskName"]],
-      ['$set' => ['task' => $_POST["taskNameUpdate"]]]
-  );
-  $manager->executeBulkWrite('todo.tasks', $bulk);
+if(!empty($_POST["done"])) {
+    $bulk = new MongoDB\Driver\BulkWrite;
+    $bulk->update(['text' => $_POST["nameText"], 'done' => false, 'user' => $_SESSION["userName"]], ['$set' => ['done' => true]]);
+    $manager->executeBulkWrite('keepNote.task', $bulk);
 }
+if(!empty($_POST["delete"])) {
+    $bulk = new MongoDB\Driver\BulkWrite;
+    $bulk->delete(['text' => $_POST["nameText"], 'user' => $_SESSION["userName"]]);
+    $manager->executeBulkWrite('keepNote.task', $bulk);
+}
+$query = new MongoDB\Driver\Query(['user' => $_SESSION["userName"]]);
+$rows = $manager->executeQuery('keepNote.task', $query);
 
-$query = new MongoDB\Driver\Query([]); 
-$rows = $manager->executeQuery("todo.tasks", $query);
+if(!empty($_POST['theField'])) {
+    $collabFindUserQ = new MongoDB\Driver\Query(['userName' => $_POST['theField']]);
+    $existUser = $manager->executeQuery('keepNote.users', $collabFindUserQ)->toArray();
+    if(empty($existUser)) {
+        echo '<script type="text/JavaScript"> 
+            alert("User Not Found!");
+            </script>'
+        ;
+    }
+    else{
+        $bulk = new MongoDB\Driver\BulkWrite;
+        $bulk->insert(['text' => $_POST["nameText"], 'done' => false, 'user' => $existUser[0]->userName]);
+        $manager->executeBulkWrite('keepNote.task', $bulk);
+        echo '<script type="text/JavaScript"> 
+            alert("Secsessful Collaborate!");
+            </script>'
+        ;
+    }
+}
+//var_dump();
+// phpinfo();
 ?>
-
+<!DOCTYPE html>
 <html>
     <head>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
-        
+        <title>Keep Note For You!</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="./main.css?v=<?php echo time(); ?>" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     </head>
     <body>
-        <section class="vh-100" style="background-color: #e2d5de;">
-            <div class="container py-5 h-100">
-              <div class="row d-flex justify-content-center align-items-center h-100">
-                <div class="col col-xl-10">
-                  <div class="card" style="border-radius: 15px;">
-                    <div class="card-body p-5">
-                      <h6 class="mb-3">Awesome Todo List</h6>
-                      <form class="d-flex justify-content-center align-items-center mb-4" action="index.php" method="post">
-                        <div class="form-outline flex-fill">
-                          <input type="text" id="form1" name="taskName" class="form-control form-control-lg" />
-                          <label class="form-label" for="form1">What do you need to do today?</label>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-lg ms-2">Add</button>
-                      </form>
-          
-                      <ul class="list-group mb-0">
-                        <?php
-						foreach ($rows as $row) { ?>
-						<form action="index.php" method="post">
-							<input type="hidden" name="oldTaskName" value="<?php echo $row->task ?>">
-							<li class="list-group-item d-flex justify-content-between align-items-center border-start-0 border-top-0 border-end-0 border-bottom rounded-0 mb-2">
-							<div class="d-flex align-items-center">
-								<input class="form-check-input me-2" name="completed" type="checkbox" value="<?php $row->completed ?>" aria-label="..." />
-								<input type="text" name="taskNameUpdate" class="form-control form-control-lg" value="<?php echo $row->task; ?>" />
-							</div>
-							<input type="submit" class="btn btn-success" name="update" value="update" />
-              <input type="submit" class="btn btn-danger" name="delete" value="delete" />
-							</li>
-						</form>
-						<?php } ?>
-                      </ul>
-          
-                    </div>
-                  </div>
-          
-                </div>
-              </div>
-            </div>
-          </section>
+        <div id="myDIV" class="header">
+        <h2>My To Do List</h2>
+        <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="POST">
+            <input name="workToDo" type="text" id="myInput" placeholder="what do you want to do? . . .">
+            <input type="submit" onclick="window.location.href=window.location.href" class="addBtn" value="add">
+        </form>
+        </div>
+
+        <ul id="myUL">
+        <?php
+        foreach($rows as $row) {
+        ?>  
+
+            <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" id="theForm" method="POST">
+                <li>
+                    <input type="hidden" name="task_id" value="<?php echo $row->_id; ?>" />
+                    <input class="checkbox" type="checkbox" id="task_<?php echo $row->_id; ?>" name="done" onclick="toRemoveTick('task_<?php echo $row->_id; ?>')" <?php
+                    if($row->done == true) {
+                        echo 'checked';
+                    }
+                    ?> />
+
+                    <input type="text" value="<?php echo $row->text;?>"/>
+                    <input class="btnCheckbox" type="submit" value="to Do it"/>
+                    <input class="btnCheckbox" name="delete" type="submit" value="Delete"/>
+
+                    <input type="hidden" name="theField" id="theField"/>
+                    <input class="btnCheckbox" name="collaborate" type="submit" value="collaborate" onclick="window.open('smallPageCollab.php', 
+                            'mylala', 
+                            'width=300,height=250,left=520, top=250'); 
+                    return false;" />
+                </li>
+            </form>
+        <?php } ?>
+        </ul>
+        
     </body>
 </html>
+<script type="text/javascript">
+    function toRemoveTick(id) {
+        alert(id);
+        // window.location.reload(false); 
+        // var str = '<?php if($row->done == true){echo "lala";}else{echo "no lala";}?>';
+        // alert(str);
+
+    }
+</script>

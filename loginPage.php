@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             session_start();
             $_SESSION["userName"] = $row->userName;
             $_SESSION["passWord"] = $row->passWord;
-            header("Location:/mingo/importantProject.php");
+            header("Location:/keepNote/index.php");
             exit;
         }
     }
@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <head>
         <title>Login^_^</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" type="text/css" href="./log.css?v=<?php echo time(); ?>" />
+        <link rel="stylesheet" type="text/css" href="./login.css?v=<?php echo time(); ?>" />
     </head>
     <body>
         <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="POST">

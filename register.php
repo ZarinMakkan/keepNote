@@ -19,7 +19,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     <head>
         <title>Register^_^</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" type="text/css" href="./log.css?v=<?php echo time(); ?>" />
+        <link rel="stylesheet" type="text/css" href="./login.css?v=<?php echo time(); ?>" />
     </head>
     <body>
         <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="POST">
