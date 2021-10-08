@@ -1,41 +1,38 @@
 <?php
-var_dump($_POST);
 session_start();
 if(empty($_SESSION['userName'])) {
     header("Location:loginPage.php");
     exit;
 }
-
+if(!empty($_POST["task_id"])) {
+    $taskID = $_POST["task_id"];
+}
 $manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
-if(!empty($_POST["workToDo"])) {
+if(!empty($_POST["mainText"])) {
     $bulk = new MongoDB\Driver\BulkWrite;
-    $bulk->insert(['text' => $_POST["workToDo"], 'done' => false, 'user' => $_SESSION["userName"]]);
+    $bulk->insert(['text' => $_POST["mainText"], 'done' => false, 'user' => $_SESSION["userName"]]);
     $manager->executeBulkWrite('keepNote.task', $bulk);
 }
+
 if(!empty($_POST["status"])) {
     $bulk = new MongoDB\Driver\BulkWrite;
-    $bulk->update(['_id' => new \MongoDB\BSON\ObjectID($_POST["task_id"]),'user' => $_SESSION["userName"]], [
+    $bulk->update(['_id' => new \MongoDB\BSON\ObjectID($taskID),'user' => $_SESSION["userName"]], [
         '$set' => [
             'done' => $_POST["status"] == 'done' ? true : false
         ]
     ]);
     $manager->executeBulkWrite('keepNote.task', $bulk);
 }
-if(!empty($_POST["done"])) {
-    $bulk = new MongoDB\Driver\BulkWrite;
-    $bulk->update(['_id' => $_POST["task_id"], 'done' => false, 'user' => $_SESSION["userName"]], ['$set' => ['done' => true]]);
-    $manager->executeBulkWrite('keepNote.task', $bulk);
-}
 if(!empty($_POST["delete"])) {
     $bulk = new MongoDB\Driver\BulkWrite;
-    $bulk->delete(['_id' => $_POST["task_id"], 'user' => $_SESSION["userName"]]);
+    $bulk->delete(['_id' => new \MongoDB\BSON\ObjectID($taskID), 'user' => $_SESSION["userName"]]);
     $manager->executeBulkWrite('keepNote.task', $bulk);
 }
 $query = new MongoDB\Driver\Query(['user' => $_SESSION["userName"]]);
 $rows = $manager->executeQuery('keepNote.task', $query);
 
-if(!empty($_POST['theField'])) {
-    $collabFindUserQ = new MongoDB\Driver\Query(['userName' => $_POST['theField']]);
+if(!empty($_POST['fieldCollab'])) {
+    $collabFindUserQ = new MongoDB\Driver\Query(['userName' => $_POST['fieldCollab']]);
     $existUser = $manager->executeQuery('keepNote.users', $collabFindUserQ)->toArray();
     if(empty($existUser)) {
         echo '<script type="text/JavaScript"> 
@@ -53,7 +50,6 @@ if(!empty($_POST['theField'])) {
         ;
     }
 }
-//var_dump();
 // phpinfo();
 ?>
 <!DOCTYPE html>
@@ -68,7 +64,7 @@ if(!empty($_POST['theField'])) {
         <div id="myDIV" class="header">
         <h2>My To Do List</h2>
         <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="POST">
-            <input name="workToDo" type="text" id="myInput" placeholder="what do you want to do? . . .">
+            <input name="mainText" type="text" id="myInput" placeholder="what do you want to do? . . .">
             <input type="submit" onclick="window.location.href=window.location.href" class="addBtn" value="add">
         </form>
         </div>
@@ -81,7 +77,7 @@ if(!empty($_POST['theField'])) {
             <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" id="theForm" method="POST">
                 <li>
                     <input type="hidden" name="task_id" value="<?php echo $row->_id; ?>" />
-                    <input class="checkbox" type="checkbox" id="task_<?php echo $row->_id; ?>" name="done" onclick="toRemoveTick('<?php echo $row->_id; ?>')" <?php
+                    <input class="checkbox" type="checkbox" id="task_<?php echo $row->_id; ?>" name="done" onclick="toChangeTick('<?php echo $row->_id; ?>')" <?php
                     if($row->done == true) {
                         echo 'checked';
                     }
@@ -89,10 +85,9 @@ if(!empty($_POST['theField'])) {
 
                     <input type="text" value="<?php echo $row->text;?>"/>
                     
-                    <input class="btnCheckbox" type="submit" value="to Do it"/>
                     <input class="btnCheckbox" name="delete" type="submit" value="Delete"/>
 
-                    <input type="hidden" name="theField" id="theField"/>
+                    <input type="hidden" name="fieldCollab" id="fieldCollab"/>
                     <input class="btnCheckbox" name="collaborate" type="submit" value="collaborate" onclick="window.open('smallPageCollab.php', 
                             'mylala', 
                             'width=300,height=250,left=520, top=250'); 
@@ -105,7 +100,7 @@ if(!empty($_POST['theField'])) {
     </body>
 </html>
 <script type="text/javascript">
-    function toRemoveTick(id) {
+    function toChangeTick(id) {
         var status = 'todo';
         if($("#task_"+id).prop('checked') == true){
             status = 'done';
@@ -119,7 +114,7 @@ if(!empty($_POST['theField'])) {
            }, // serializes the form's elements.
            success: function(data)
            {
-                alert(status); // show response from the php script.
+                // alert(status); // show response from the php script.
                 location.reload();
            }
          });
