@@ -16,7 +16,7 @@
         
         var doc = window.opener.document,
             theForm = doc.getElementById("theForm"),
-            theField = doc.getElementById("theField");
+            theField = doc.getElementById("fieldCollab");
         theField.value = document.getElementById("thePopupField").value;
         
         window.close();

@@ -1,4 +1,5 @@
 <?php
+var_dump($_POST);
 session_start();
 if(empty($_SESSION['userName'])) {
     header("Location:loginPage.php");
@@ -41,8 +42,11 @@ if(!empty($_POST['fieldCollab'])) {
         ;
     }
     else{
+        $findTaskName = new MongoDB\Driver\Query(['_id' => new \MongoDB\BSON\ObjectID($taskID)]);
+        $foundedTask = $manager->executeQuery('keepNote.task', $findTaskName)->toArray();
+
         $bulk = new MongoDB\Driver\BulkWrite;
-        $bulk->insert(['text' => $_POST["nameText"], 'done' => false, 'user' => $existUser[0]->userName]);
+        $bulk->insert(['text' => $foundedTask[0]->text, 'done' => false, 'user' => $existUser[0]->userName]);
         $manager->executeBulkWrite('keepNote.task', $bulk);
         echo '<script type="text/JavaScript"> 
             alert("Secsessful Collaborate!");
