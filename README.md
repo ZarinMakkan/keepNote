@@ -1,1 +1,1 @@
-# keep note, a external memory for youuuu!
+# Keep Note, an external memory for youuuu!

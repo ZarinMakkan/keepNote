@@ -1,7 +1,8 @@
 <?php
+var_dump($_POST);
 session_start();
 if(empty($_SESSION['userName'])) {
-    header("Location:/keepNote/loginPage.php");
+    header("Location:loginPage.php");
     exit;
 }
 
@@ -11,14 +12,23 @@ if(!empty($_POST["workToDo"])) {
     $bulk->insert(['text' => $_POST["workToDo"], 'done' => false, 'user' => $_SESSION["userName"]]);
     $manager->executeBulkWrite('keepNote.task', $bulk);
 }
+if(!empty($_POST["status"])) {
+    $bulk = new MongoDB\Driver\BulkWrite;
+    $bulk->update(['_id' => new \MongoDB\BSON\ObjectID($_POST["task_id"]),'user' => $_SESSION["userName"]], [
+        '$set' => [
+            'done' => $_POST["status"] == 'done' ? true : false
+        ]
+    ]);
+    $manager->executeBulkWrite('keepNote.task', $bulk);
+}
 if(!empty($_POST["done"])) {
     $bulk = new MongoDB\Driver\BulkWrite;
-    $bulk->update(['text' => $_POST["nameText"], 'done' => false, 'user' => $_SESSION["userName"]], ['$set' => ['done' => true]]);
+    $bulk->update(['_id' => $_POST["task_id"], 'done' => false, 'user' => $_SESSION["userName"]], ['$set' => ['done' => true]]);
     $manager->executeBulkWrite('keepNote.task', $bulk);
 }
 if(!empty($_POST["delete"])) {
     $bulk = new MongoDB\Driver\BulkWrite;
-    $bulk->delete(['text' => $_POST["nameText"], 'user' => $_SESSION["userName"]]);
+    $bulk->delete(['_id' => $_POST["task_id"], 'user' => $_SESSION["userName"]]);
     $manager->executeBulkWrite('keepNote.task', $bulk);
 }
 $query = new MongoDB\Driver\Query(['user' => $_SESSION["userName"]]);
@@ -71,13 +81,14 @@ if(!empty($_POST['theField'])) {
             <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" id="theForm" method="POST">
                 <li>
                     <input type="hidden" name="task_id" value="<?php echo $row->_id; ?>" />
-                    <input class="checkbox" type="checkbox" id="task_<?php echo $row->_id; ?>" name="done" onclick="toRemoveTick('task_<?php echo $row->_id; ?>')" <?php
+                    <input class="checkbox" type="checkbox" id="task_<?php echo $row->_id; ?>" name="done" onclick="toRemoveTick('<?php echo $row->_id; ?>')" <?php
                     if($row->done == true) {
                         echo 'checked';
                     }
                     ?> />
 
                     <input type="text" value="<?php echo $row->text;?>"/>
+                    
                     <input class="btnCheckbox" type="submit" value="to Do it"/>
                     <input class="btnCheckbox" name="delete" type="submit" value="Delete"/>
 
@@ -95,10 +106,22 @@ if(!empty($_POST['theField'])) {
 </html>
 <script type="text/javascript">
     function toRemoveTick(id) {
-        alert(id);
-        // window.location.reload(false); 
-        // var str = '<?php if($row->done == true){echo "lala";}else{echo "no lala";}?>';
-        // alert(str);
-
+        var status = 'todo';
+        if($("#task_"+id).prop('checked') == true){
+            status = 'done';
+        }
+        $.ajax({
+           type: "POST",
+           url: window.location.href,
+           data: {
+                status: status,
+                task_id: id
+           }, // serializes the form's elements.
+           success: function(data)
+           {
+                alert(status); // show response from the php script.
+                location.reload();
+           }
+         });
     }
 </script>
