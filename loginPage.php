@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $flagForExistInDataBase = true;
             session_start();
             $_SESSION["userName"] = $row->userName;
-            $_SESSION["passWord"] = $row->passWord;
+            // $_SESSION["passWord"] = $row->passWord; it's not important
             header("Location:index.php");
             exit;
         }
