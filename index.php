@@ -1,5 +1,4 @@
 <?php
-var_dump($_POST);
 session_start();
 if(empty($_SESSION['userName'])) {
     header("Location:loginPage.php");
@@ -13,6 +12,8 @@ if(!empty($_POST["mainText"])) {
     $bulk = new MongoDB\Driver\BulkWrite;
     $bulk->insert(['text' => $_POST["mainText"], 'done' => false, 'user' => $_SESSION["userName"]]);
     $manager->executeBulkWrite('keepNote.task', $bulk);
+    $thisPage = $_SERVER["PHP_SELF"];
+    header("refresh: 0; url=$thisPage");
 }
 
 if(!empty($_POST["status"])) {
