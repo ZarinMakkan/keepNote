@@ -1,3 +1,15 @@
+@font-face {
+  font-family: Tanha;
+  src: url('Fonts/Tanha/Tanha.eot');
+  src: url('Fonts/Tanha/Tanha.eot?#iefix') format('embedded-opentype'),
+      url('Fonts/Tanha/Tanha.woff') format('woff'),
+      url('Fonts/Tanha/Tanha.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+input{
+  font-family: Tanha;
+}
 /* Include the padding and border in an element's total width and height */
 * {
   box-sizing: border-box;
@@ -134,4 +146,56 @@ input {
   display: inline;
   width: auto;
   margin: 2px;
+}
+
+.btnCollabClick {
+  display: inline;
+  width: auto;
+  margin: 2px;
+}
+
+
+
+/* modal css */
+#modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+#modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  border: 1px solid #888;
+  height: auto;
+  width: 40%;
+}
+
+#collabInput{
+  float: left;
+  width: 80%;
+  height: 40px;
+}
+
+#closeSubmitmodal {
+  color: #aaa;
+  float: right;
+  font-size: 15px;
+  width: 20%;
+  font-weight: bold;
+  height: 40px;
+}
+
+#closeSubmitmodal:hover,
+#closeSubmitmodal:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
 }
